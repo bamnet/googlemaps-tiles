@@ -19,15 +19,34 @@ interface Viewport {
     }>
 }
 
+export interface SessionRequest {
+    mapType: MapType
+    language: string
+    region: string
+}
+
+export enum MapType {
+    Roadmap = "roadmap",
+    Satellite = "satellite",
+}
+
 export const MapTilesURL = 'https://tile.googleapis.com/v1/2dtiles/{z}/{x}/{y}';
+
+const defaultSession: SessionRequest = {
+    mapType: MapType.Roadmap,
+    language: "en-US",
+    region: "us",
+};
 
 export class GoogleMapTiles {
     readonly apiKey: string;
 
     session: Session | undefined;
+    sessionRequest: SessionRequest;
 
-    constructor(apiKey: string) {
+    constructor(apiKey: string, sessionRequest: SessionRequest = defaultSession) {
         this.apiKey = apiKey;
+        this.sessionRequest = sessionRequest;
         this.refreshSession();
     }
 
@@ -37,11 +56,7 @@ export class GoogleMapTiles {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-                "mapType": "roadmap",
-                "language": "en-US",
-                "region": "us",
-            }),
+            body: JSON.stringify(this.sessionRequest),
         });
 
         this.session = await resp.json() as Session;
