@@ -1,6 +1,6 @@
 import './style.css';
 
-import { AttributionControl, Map } from 'maplibre-gl';
+import { AttributionControl, Map, Marker } from 'maplibre-gl';
 import { CustomLogoControl } from './logo';
 import { GoogleMapTiles, MapTilesURL } from './googlemaptiles';
 
@@ -59,5 +59,27 @@ const API_KEY = import.meta.env.VITE_API_KEY;
   // Also, show a Google logo!
   const logo = new CustomLogoControl();
   map.addControl(logo);
-})();
 
+  // Just play with a marker.
+  const marker = new Marker({});
+
+  function animateMarker(timestamp: number) {
+    const radius = 0.1;
+
+    // Update the data to a new position based on the animation timestamp. The
+    // divisor in the expression `timestamp / 1000` controls the animation speed.
+    marker.setLngLat([
+      150.644 + Math.cos(timestamp / 1000) * radius,
+      -34.397 + Math.sin(timestamp / 1000) * radius
+    ]);
+
+    // Ensure it's added to the map. This is safe to call if it's already added.
+    marker.addTo(map);
+
+    // Request the next frame of the animation.
+    requestAnimationFrame(animateMarker);
+  }
+
+  // Start the animation.
+  requestAnimationFrame(animateMarker);
+})();
