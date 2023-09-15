@@ -1,30 +1,26 @@
 import './style.css';
 
-import { AttributionControl, Map} from 'maplibre-gl';
+import { AttributionControl, Map } from 'maplibre-gl';
 import { CustomLogoControl } from './logo';
-import { getAttribution, getSessionToken, tileURL } from './util';
+import { GoogleMapTiles, MapTilesURL } from './googlemaptiles';
 
 const API_KEY = import.meta.env.VITE_API_KEY;
 
 (async () => {
-  const token = await getSessionToken(API_KEY);
-  const tiles = await tileURL(API_KEY, token);
+  const tiles = new GoogleMapTiles(API_KEY);
+  await tiles.refreshSession();
 
   const map = new Map({
-    
-    container: 'map',
-    center: [150.644, -34.397],
-    zoom: 8,
     style: {
       version: 8,
       sources: {
         "gmp-tiles": {
           "type": "raster",
-          "tiles": [tiles],
+          "tiles": [MapTilesURL],
           "tileSize": 256,
         }
       },
-      "layers": [
+      layers: [
         {
           "id": "map",
           "source": "gmp-tiles",
@@ -33,25 +29,31 @@ const API_KEY = import.meta.env.VITE_API_KEY;
       ]
 
     },
+    // Add the auth / session tokens to tile requests.
+    transformRequest: tiles.requestTransformer(),
+    // Turn off the default attribution control, we need our own.
     attributionControl: false,
+    container: 'map',
+    center: [150.644, -34.397],
+    zoom: 8,
   });
 
 
-const attribution = new AttributionControl();
-map.addControl(attribution);
+  const attribution = new AttributionControl();
+  map.addControl(attribution);
 
-map.on('sourcedata', function(e) {
-  if (e.isSourceLoaded) {
+  map.on('sourcedata', function (e) {
+    if (e.isSourceLoaded) {
       const bounds = e.target.getBounds();
       const zoom = e.target.getZoom();
-      getAttribution(bounds, zoom, token, API_KEY).then((value) => {
-        attribution.options.customAttribution = value;
+      tiles.getViewport(bounds, zoom).then((viewport) => {
+        attribution.options.customAttribution = viewport.copyright;
         attribution._updateAttributions();
-      })
-  }
-});
+      });
+    }
+  });
 
-const logo = new CustomLogoControl();
-map.addControl(logo);
+  const logo = new CustomLogoControl();
+  map.addControl(logo);
 })();
 
