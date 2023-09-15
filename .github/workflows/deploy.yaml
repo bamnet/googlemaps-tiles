@@ -32,6 +32,8 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm install
+      - name: Setup API Key
+        run: echo "VITE_API_KEY=$API_KEY" > .env.production.local
       - name: Build
         run: npm run build -- --base googlemaps-tiles
       - name: Setup Pages
