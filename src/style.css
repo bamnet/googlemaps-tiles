@@ -1,0 +1,10 @@
+@import 'maplibre-gl/dist/maplibre-gl.css';
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+#map {
+  min-height: 100%; 
+}
