@@ -8,6 +8,8 @@ const API_KEY = import.meta.env.VITE_API_KEY;
 
 (async () => {
   const tiles = new GoogleMapTiles(API_KEY);
+
+  // Make sure we have a session token before we start loading any tiles.
   await tiles.refreshSession();
 
   const map = new Map({
@@ -42,6 +44,7 @@ const API_KEY = import.meta.env.VITE_API_KEY;
   const attribution = new AttributionControl();
   map.addControl(attribution);
 
+  // When the map moves, we need to update the attribution.
   map.on('sourcedata', function (e) {
     if (e.isSourceLoaded) {
       const bounds = e.target.getBounds();
@@ -53,6 +56,7 @@ const API_KEY = import.meta.env.VITE_API_KEY;
     }
   });
 
+  // Also, show a Google logo!
   const logo = new CustomLogoControl();
   map.addControl(logo);
 })();
